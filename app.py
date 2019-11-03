@@ -59,16 +59,26 @@ def index():
 
 @app.route('/venues')
 def venues():
+  """Displays all venues grouped by their city and state.
+
+  Returns:
+      template -- An HTML template/page with all venues returned from the database query for all venues.
+  """
   try:
+    # create a new data list
     data = []
+    # select all distinct cities and states from the venues table
     distinct_state_and_cities = Venue.query.distinct(Venue.city, Venue.state).all()
 
     for index, distinct_venue in enumerate(distinct_state_and_cities):
+      # loop through the results of the distinct values and create a dictionary for every city/state
       venue_details = { 'venues': [] }
       venue_details['city'] = distinct_state_and_cities[index].city
       venue_details['state'] = distinct_state_and_cities[index].state
+      # get all venues for a city/state in a list
       venues = Venue.query.filter(Venue.city == distinct_state_and_cities[index].city, Venue.state == distinct_state_and_cities[index].state).all()
       for venue in venues:
+        # loop through the list of venues and create a venue object that contains the number of upcoming shows for each venue
         current_time = datetime.now()
         venue_dict = {}
         venue_dict['id'] = venue.id
@@ -89,16 +99,24 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
+  """shows a venue search result page with the given search term.
+
+  Returns:
+      template -- An HTML template that displays the venues that match the search term entered.
+  """
   try:
     search_term = request.form['search_term']
     keywords = '%{}%'.format(search_term)
     data = []
     response = {}
+    # query the venue table to get venues whose names match the search term regardless of the character casing
     count = Venue.query.filter(Venue.name.ilike(keywords)).count()
     venues = Venue.query.filter(Venue.name.ilike(keywords)).all()
     current_time = datetime.now()
 
     for index, venue in enumerate(venues):
+      # loop through the list of venues and create a venue object for each venue,
+      # that contains the number of upcoming shows for each venue
       venue_dict = {}
       upcoming_shows_count = Venue.query.filter(Venue.id == venue.id, Show.venue_id == venue.id, Show.start_time > current_time).count()
       venue_dict['id'] = venues[index].id
@@ -116,15 +134,23 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-  # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id
+  """shows the venue page with the given venue_id.
+
+  Arguments:
+      venue_id {integer} -- The ID of the venue to be displayed.
+
+  Returns:
+      template -- An HTML template/page that displays a venue matching the ID provided in the request.
+  """
   try:
     data = {'upcoming_shows': [], 'past_shows': [],
         'upcoming_shows_count': 0, 'past_shows_count': 0}
     current_time = datetime.now()
 
+    # find the venue with the matching ID from the table
     venue = Venue.query.get(venue_id)
     for index, show in enumerate(venue.shows):
+      # get the all the shows for a venue and group them by upcoming and past events
       if show.start_time > current_time:
         show_data = {}
         data['upcoming_shows_count'] = data['upcoming_shows_count'] + 1
@@ -168,6 +194,11 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+  """creates a new venue with data submitted from the frontend form.
+
+  Returns:
+      template -- An HTML template/page of the homepage with a flash message about the success or failure of the request.
+  """
   error = False
   body = {}
   try:
@@ -200,6 +231,14 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
+  """Deletes a venue with the provided venue ID.
+
+  Arguments:
+      venue_id {integer} -- The ID of the venue to be deleted
+
+  Returns:
+      template -- An HTML template/page of the homepage with a flash message about the success or failure of the request
+  """
   error = False
   try:
     Venue.query.filter_by(id=venue_id).delete()
@@ -220,6 +259,11 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
+  """Displays all artists with their names.
+
+  Returns:
+      template -- An HTML template/page with all artists returned from the database query for all artists.
+  """
   try:
     data = []
 
@@ -237,6 +281,11 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
+  """shows an artists search result page with the given search term.
+
+  Returns:
+      template -- An HTML template that displays the venues that match the search term entered.
+  """
   try:
     search_term = request.form['search_term']
     keywords = '%{}%'.format(search_term)
@@ -263,6 +312,14 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
+  """shows an artist's page with the given artist ID.
+
+  Arguments:
+      artist_id {integer} -- The ID of the artist to be displayed.
+
+  Returns:
+      template -- An HTML template/page that displays an artist matching the ID provided in the request.
+  """
   try:
     data = {'upcoming_shows': [], 'past_shows': [],
         'upcoming_shows_count': 0, 'past_shows_count': 0}
@@ -306,12 +363,28 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
+  """displays a page where an artists information can be updated.
+
+  Arguments:
+      artist_id {integer} -- The ID of the artist whose information is to be updated.
+
+  Returns:
+      template -- An HTML page with a form for the fields to be updated
+  """
   form = ArtistForm()
   artist = Artist.query.get(artist_id)
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+  """Updates an artist's information.
+
+  Arguments:
+      artist_id {integer} -- The ID of the artist whose information will be updated.
+
+  Returns:
+      template -- An HTML page that shows the artist's page with the new information
+  """
   error = False
   try:
     artist = Artist.query.get(artist_id)
@@ -336,12 +409,28 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
+  """displays a page where a venue's information can be updated.
+
+  Arguments:
+      venue_id {intger} -- The ID of the venue whose information is to be updated
+
+  Returns:
+      template -- An HTML page with a form for the fields to be updated
+  """
   form = VenueForm()
   venue = Venue.query.get(venue_id)
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+  """Updates a venue's information
+
+  Arguments:
+      venue_id {integer} -- The ID of the venue whose informatio will be updated
+
+  Returns:
+      template -- An HTML page that shows the venue's page with the new information
+  """
   error = False
   try:
     venue = Venue.query.get(venue_id)
@@ -370,11 +459,21 @@ def edit_venue_submission(venue_id):
 
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
+  """dispays a page with a form where a new artist can be added
+
+  Returns:
+      template -- An HTML page showing form with the fields required when adding a new artist
+  """
   form = ArtistForm()
   return render_template('forms/new_artist.html', form=form)
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+  """Creates a new artist with the data submitted from the frontend form.
+
+  Returns:
+      template -- An HTML template/page of the homepage with a flash message about the success or failure of the request
+  """
   error = False
   body = {}
   try:
@@ -408,6 +507,11 @@ def create_artist_submission():
 
 @app.route('/shows')
 def shows():
+  """Displays a list of all shows with the venues and artists.
+
+  Returns:
+      template -- An HTML page that displays the shows listed
+  """
   try:
     data = []
     shows = Show.query.all()
@@ -437,6 +541,11 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
+  """Creates a show with the data submitted on the frontend form.
+
+  Returns:
+      template -- An HTML template/page of the homepage with a flash message about the success or failure of the request.
+  """
   error = False
   try:
     artist_id = request.form['artist_id']

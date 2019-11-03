@@ -13,6 +13,14 @@ db = SQLAlchemy(app)
 
 
 class Venue(db.Model):
+    """Model for a venue in the database.
+
+    Arguments:
+        db {object} -- SQLAlchemy database instance.
+
+    Returns:
+        object -- A venue object with the corresponding database colums.
+    """
     __tablename__ = 'Venue'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -32,11 +40,20 @@ class Venue(db.Model):
     def __repr__(self):
         return f'<Venue {self.id} {self.name} {self.city} {self.state} {self.address} {self.shows}>'
 
+    # returns the venue instance as a dictionary
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Artist(db.Model):
+    """Model for an artist in the database.
+
+    Arguments:
+        db {object} -- SQLAlchemy database instance.
+
+    Returns:
+        object -- An artist object with the corresponding database columns.
+    """
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -54,15 +71,20 @@ class Artist(db.Model):
     def __repr__(self):
         return f'<Artist {self.id} {self.name} {self.city} {self.state} {self.address} {self.shows}>'
 
+    # returns the artist instance as a dictionary
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
 
 class Show(db.Model):
+    """Model for a show in the database.
+
+    Arguments:
+        db {object} -- SQLAlchemy database instance.
+
+    Returns:
+        object -- A show object with the corresponding database columns.
+    """
     __tablename__ = 'Show'
 
     id = db.Column(db.Integer, primary_key=True)
